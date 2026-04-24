@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   BadgeInfo,
   BellRing,
@@ -17,8 +18,8 @@ import {
   Upload,
   View,
 } from "lucide-react";
-import { postJson, putJson } from "@/lib/api";
-import { AiConfigResponse, AiConfigUpdateRequest, ChatReplyResponse } from "@/lib/types";
+import { postForm, postJson, putJson } from "@/lib/api";
+import { AiConfigResponse, AiConfigUpdateRequest, ChatReplyResponse, KnowledgeUploadResponse } from "@/lib/types";
 
 type Props = {
   initialData: AiConfigResponse;
@@ -37,6 +38,7 @@ function FileActionButton({ children }: { children: React.ReactNode }) {
 }
 
 export function AiConfigPanel({ initialData }: Props) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const [apiKey, setApiKey] = useState("");
   const [provider, setProvider] = useState(initialData.provider);
@@ -54,6 +56,20 @@ export function AiConfigPanel({ initialData }: Props) {
   const [testing, setTesting] = useState(false);
   const [testError, setTestError] = useState("");
   const [testReply, setTestReply] = useState<ChatReplyResponse | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const supportedFormats = [
+    "PDF",
+    "Word (.docx)",
+    "PowerPoint (.pptx)",
+    "Excel (.xlsx/.xls)",
+    "Images (JPEG/PNG)",
+    "Audio",
+    "HTML",
+    "CSV / JSON / XML",
+    "EPub",
+    "ZIP",
+  ];
 
   const skillTags = useMemo(
     () =>
@@ -123,6 +139,30 @@ export function AiConfigPanel({ initialData }: Props) {
       setTestError("AI 测试失败，请先确认 API Key、Base URL 和模型配置可用。");
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function handleKnowledgeUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setUploading(true);
+    setMessage("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("kind", "resume");
+      form.append("title", file.name.replace(/\.[^.]+$/, ""));
+      const result = await postForm<KnowledgeUploadResponse>("rag/upload", form);
+      setMessage(`已导入 ${result.chunks} 个知识片段`);
+      router.refresh();
+    } catch {
+      setMessage("文件导入失败，请稍后重试");
+    } finally {
+      event.target.value = "";
+      setUploading(false);
     }
   }
 
@@ -481,12 +521,39 @@ export function AiConfigPanel({ initialData }: Props) {
                 <Upload className="h-8 w-8 text-[var(--color-primary)]" />
               </div>
               <div className="mt-4 space-y-1">
-                <p className="text-lg font-bold text-[var(--color-primary)]">点击或拖拽文件至此处上传</p>
-                <p className="text-sm text-slate-400">上传链路下一步接入；当前右侧列表是已进入知识库的真实数据</p>
+                <p className="text-lg font-bold text-[var(--color-primary)]">上传文件并用 MarkItDown 转成 LLM 友好的 Markdown</p>
+                <p className="text-sm text-slate-400">上传后会自动转换、切块并写入本地 RAG；不会进入 Git 仓库</p>
               </div>
               <p className="mx-auto mt-4 inline-flex rounded-full bg-[rgba(225,124,90,0.08)] px-3 py-1 text-xs text-[#e17c5a]">
                 建议上传：简历、项目复盘、证书、偏好说明
               </p>
+              <div className="mx-auto mt-5 flex max-w-3xl flex-wrap justify-center gap-2">
+                {supportedFormats.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-[#d9e0ec] bg-white px-3 py-1 text-xs text-slate-600"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 text-xs leading-6 text-slate-500">
+                参考微软 MarkItDown 官方能力：支持文档、图片、音频、网页与结构化文本等多种输入格式。
+              </p>
+              <input
+                ref={fileInputRef}
+                className="hidden"
+                type="file"
+                onChange={handleKnowledgeUpload}
+              />
+              <button
+                className="mt-6 rounded-lg bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+                type="button"
+              >
+                {uploading ? "导入中..." : "选择文件并导入 RAG"}
+              </button>
             </div>
 
             <div className="mt-10">

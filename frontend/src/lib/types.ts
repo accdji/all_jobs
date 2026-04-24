@@ -180,6 +180,16 @@ export type InterviewsResponse = {
   };
 };
 
+export type KnowledgeUploadResponse = {
+  source: string;
+  filename: string;
+  title: string;
+  kind: "resume" | "project" | "preference" | "faq" | "conversation" | "interview" | "job" | "decision";
+  ingested: number;
+  chunks: number;
+  tags: string[];
+};
+
 export type ResumeLabResponse = {
   score: number;
   quality: string;

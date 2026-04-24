@@ -12,6 +12,7 @@ from .routers.dashboard import build_dashboard_router
 from .services.automation import AutomationService
 from .services.browser_worker import BrowserWorker
 from .services.chat import ChatAgentService
+from .services.document_ingest import DocumentIngestService
 from .services.knowledge import KnowledgeService
 from .services.rag import RAGService
 from .services.vector_store import InMemoryVectorStore, PgVectorStore
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
         else InMemoryVectorStore(dashboard_repository.knowledge())
     )
     knowledge_service = KnowledgeService(vector_store)
+    document_ingest_service = DocumentIngestService()
     rag_service = RAGService(vector_store)
     chat_service = ChatAgentService(rag_service, dashboard_repository)
     browser_worker = BrowserWorker(
@@ -41,6 +43,7 @@ async def lifespan(app: FastAPI):
     app.state.dashboard_repository = dashboard_repository
     app.state.rag_service = rag_service
     app.state.knowledge_service = knowledge_service
+    app.state.document_ingest_service = document_ingest_service
     app.state.chat_service = chat_service
     app.state.automation_service = automation_service
     yield
@@ -70,6 +73,7 @@ vector_store = (
     else InMemoryVectorStore(dashboard_repository.knowledge())
 )
 knowledge_service = KnowledgeService(vector_store)
+document_ingest_service = DocumentIngestService()
 rag_service = RAGService(vector_store)
 chat_service = ChatAgentService(rag_service, dashboard_repository)
 browser_worker = BrowserWorker(
@@ -80,4 +84,13 @@ browser_worker = BrowserWorker(
 automation_service = AutomationService(AutomationTaskRepository(), dashboard_repository, browser_worker, settings)
 
 app.include_router(build_dashboard_router(dashboard_repository))
-app.include_router(build_agent_router(dashboard_repository, rag_service, knowledge_service, chat_service, automation_service))
+app.include_router(
+    build_agent_router(
+        dashboard_repository,
+        rag_service,
+        knowledge_service,
+        document_ingest_service,
+        chat_service,
+        automation_service,
+    )
+)

@@ -12,5 +12,9 @@ class KnowledgeService:
         count = self._store.upsert(chunks)
         return {"ingested": count, "source": "api"}
 
+    def ingest_chunks(self, chunks: list[KnowledgeChunk], source: str) -> dict:
+        count = self._store.upsert(chunks)
+        return {"ingested": count, "source": source}
+
     def search(self, query: str, top_k: int) -> RAGSearchResponse:
         return RAGSearchResponse(query=query, results=self._store.search(query, top_k))

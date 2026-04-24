@@ -52,3 +52,16 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
 
   return response.json() as Promise<T>;
 }
+
+export async function postForm<T>(path: string, body: FormData): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
+    method: "POST",
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed for ${path}`);
+  }
+
+  return response.json() as Promise<T>;
+}

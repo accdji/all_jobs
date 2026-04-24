@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from ..repositories import DashboardRepository
 from ..schemas import (
@@ -9,11 +9,13 @@ from ..schemas import (
     ChatReplyRequest,
     ChatReplyResponse,
     KnowledgeIngestRequest,
+    KnowledgeUploadResponse,
     RAGSearchRequest,
     RAGSearchResponse,
 )
 from ..services.automation import AutomationService
 from ..services.chat import ChatAgentService
+from ..services.document_ingest import DocumentIngestService
 from ..services.knowledge import KnowledgeService
 from ..services.rag import RAGService
 
@@ -22,6 +24,7 @@ def build_agent_router(
     dashboard_repository: DashboardRepository,
     rag_service: RAGService,
     knowledge_service: KnowledgeService,
+    document_ingest_service: DocumentIngestService,
     chat_service: ChatAgentService,
     automation_service: AutomationService,
 ) -> APIRouter:
@@ -35,6 +38,24 @@ def build_agent_router(
     def ingest_knowledge(request: KnowledgeIngestRequest) -> dict:
         dashboard_repository.add_knowledge(request.chunks)
         return knowledge_service.ingest(request.chunks)
+
+    @router.post("/rag/upload", response_model=KnowledgeUploadResponse)
+    async def upload_knowledge_file(
+        file: UploadFile = File(...),
+        kind: str = Form("resume"),
+        title: str | None = Form(None),
+        tags: str = Form(""),
+    ) -> KnowledgeUploadResponse:
+        parsed_tags = [item.strip() for item in tags.split(",") if item.strip()]
+        chunks, response = await document_ingest_service.convert_upload(
+            file,
+            kind=kind,
+            title=title,
+            tags=parsed_tags,
+        )
+        dashboard_repository.add_knowledge(chunks)
+        knowledge_service.ingest_chunks(chunks, source="markitdown")
+        return response
 
     @router.post("/chat/reply", response_model=ChatReplyResponse)
     def generate_chat_reply(request: ChatReplyRequest) -> ChatReplyResponse:

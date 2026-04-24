@@ -336,6 +336,16 @@ class KnowledgeIngestRequest(BaseModel):
     chunks: list[KnowledgeChunk]
 
 
+class KnowledgeUploadResponse(BaseModel):
+    source: str
+    filename: str
+    title: str
+    kind: Literal["resume", "project", "preference", "faq", "conversation", "interview", "job", "decision"]
+    ingested: int
+    chunks: int
+    tags: list[str] = Field(default_factory=list)
+
+
 class ChatReplyRequest(BaseModel):
     message: str = Field(min_length=2, max_length=1000)
     conversation_id: str | None = None
