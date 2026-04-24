@@ -7,3 +7,8 @@ backend/app/__pycache__/
 .runtime/
 .logs/
 stitch_/
+browser_state/
+.env
+.env.local
+.env.*
+!.env.example

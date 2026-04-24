@@ -1,5 +1,27 @@
 # Boss Agent Workspace
 
+## License
+
+This project is licensed under the `Boss Agent Workspace Non-Commercial License 1.0 (BAW-NC-1.0)`.
+
+- Non-commercial use only
+- Commercial rights reserved by the copyright owner
+- Attribution required for redistribution and modification
+
+See [LICENSE](./LICENSE) for the full text.
+
+## Open Source Safety
+
+The public repository must not include any local privacy data or runtime memory.
+
+- Do not commit `.env` or any real model keys
+- Do not commit `.runtime/` runtime data
+- Do not commit `browser_state/` or any Playwright browser profile
+- Do not commit local RAG / knowledge data, chat transcripts, or interview memory exports
+- Only commit `.env.example` as the public configuration template
+
+Before pushing to GitHub, make sure your working tree does not include local runtime artifacts or generated knowledge content.
+
 一个面向 BOSS 直聘场景的本地求职 Agent 工作台。
 
 当前版本重点是：

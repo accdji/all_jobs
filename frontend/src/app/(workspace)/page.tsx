@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { AutomationPanel } from "@/components/automation-panel";
 import { PageIntro, SectionTitle, StatCard, Surface } from "@/components/ui";
@@ -89,10 +90,13 @@ export default async function DashboardPage() {
             </div>
             <p className="mt-3 max-w-4xl text-lg leading-8 text-blue-50/94">{data.insight}</p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-3 text-sm font-semibold text-[var(--color-primary)]">
+          <Link
+            href="/resume-lab"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-3 text-sm font-semibold text-[var(--color-primary)]"
+          >
             进入简历实验室
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
       </section>
     </div>

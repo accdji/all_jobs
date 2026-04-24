@@ -72,9 +72,12 @@ export function WorkspaceShell({
         </nav>
 
         <div className="mt-auto space-y-3">
-          <button className="w-full rounded-md bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-[var(--color-primary)]">
+          <Link
+            href="/resume-lab"
+            className="block w-full rounded-md bg-[var(--color-accent)] px-4 py-3 text-center text-sm font-semibold text-[var(--color-primary)]"
+          >
             上传简历
-          </button>
+          </Link>
           <div className="rounded-md border border-white/10 px-4 py-4">
             <p className="text-xs uppercase tracking-[0.22em] text-blue-100/60">Support</p>
             <p className="mt-2 text-sm text-blue-50/86">当前处于人工放行模式，自动回复已预留到后端服务层。</p>

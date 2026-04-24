@@ -21,7 +21,7 @@ from .state import LocalStateStore
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     state_store = LocalStateStore(settings.state_file)
-    dashboard_repository = DashboardRepository(state_store)
+    dashboard_repository = DashboardRepository(state_store, settings)
     task_repository = AutomationTaskRepository()
     vector_store = (
         PgVectorStore(settings.pgvector_dsn)
@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     )
     knowledge_service = KnowledgeService(vector_store)
     rag_service = RAGService(vector_store)
-    chat_service = ChatAgentService(rag_service)
+    chat_service = ChatAgentService(rag_service, dashboard_repository)
     browser_worker = BrowserWorker(
         base_url=settings.boss_base_url,
         state_dir=settings.browser_state_dir,
@@ -63,7 +63,7 @@ def health():
 
 
 state_store = LocalStateStore(settings.state_file)
-dashboard_repository = DashboardRepository(state_store)
+dashboard_repository = DashboardRepository(state_store, settings)
 vector_store = (
     PgVectorStore(settings.pgvector_dsn)
     if settings.vector_store_backend == "pgvector"
@@ -71,7 +71,7 @@ vector_store = (
 )
 knowledge_service = KnowledgeService(vector_store)
 rag_service = RAGService(vector_store)
-chat_service = ChatAgentService(rag_service)
+chat_service = ChatAgentService(rag_service, dashboard_repository)
 browser_worker = BrowserWorker(
     base_url=settings.boss_base_url,
     state_dir=settings.browser_state_dir,

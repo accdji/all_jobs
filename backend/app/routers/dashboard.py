@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from ..repositories import DashboardRepository
-from ..schemas import AIConfigResponse, ChatResponse, InterviewsResponse, JobsResponse, OverviewResponse, ResumeLabResponse
+from ..schemas import AIConfigResponse, AIConfigUpdateRequest, ChatResponse, InterviewsResponse, JobsResponse, OverviewResponse, ResumeLabResponse
 
 
 def build_dashboard_router(repository: DashboardRepository) -> APIRouter:
@@ -23,6 +23,18 @@ def build_dashboard_router(repository: DashboardRepository) -> APIRouter:
 
     @router.get("/ai-config", response_model=AIConfigResponse)
     def get_ai_config() -> AIConfigResponse:
+        return repository.ai_config()
+
+    @router.put("/ai-config", response_model=AIConfigResponse)
+    def update_ai_config(request: AIConfigUpdateRequest) -> AIConfigResponse:
+        repository.set_ai_config(
+            api_key=request.api_key,
+            provider=request.provider,
+            base_url=request.base_url,
+            model=request.model,
+            profile=request.profile,
+            subscriptions=request.subscriptions,
+        )
         return repository.ai_config()
 
     @router.get("/interviews", response_model=InterviewsResponse)

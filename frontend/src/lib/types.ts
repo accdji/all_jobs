@@ -76,6 +76,45 @@ export type JobsResponse = {
 };
 
 export type AiConfigResponse = {
+  api_key_configured: boolean;
+  api_key_masked: string;
+  api_key_env: string;
+  provider: string;
+  providers: Array<{
+    label: string;
+    value: string;
+    default_base_url: string;
+    default_model: string;
+  }>;
+  base_url: string;
+  model: string;
+  available_models: Array<{
+    label: string;
+    value: string;
+  }>;
+  profile: {
+    desired_salary_min: string;
+    desired_salary_max: string;
+    preferred_location: string;
+    skills: string[];
+    summary: string;
+  };
+  subscriptions: Array<{
+    key: string;
+    label: string;
+    description: string;
+    channel: string;
+    connected: boolean;
+  }>;
+  knowledge_files: Array<{
+    id: string;
+    title: string;
+    kind: string;
+    tags: string[];
+  }>;
+  storage_used_label: string;
+  storage_limit_label: string;
+  encryption_enabled: boolean;
   models: Array<{
     name: string;
     provider: string;
@@ -95,6 +134,27 @@ export type AiConfigResponse = {
     credits: string;
     window: string;
   };
+};
+
+export type AiConfigUpdateRequest = {
+  api_key?: string | null;
+  provider: string;
+  base_url: string;
+  model: string;
+  profile: {
+    desired_salary_min: string;
+    desired_salary_max: string;
+    preferred_location: string;
+    skills: string[];
+    summary: string;
+  };
+  subscriptions: Array<{
+    key: string;
+    label: string;
+    description: string;
+    channel: string;
+    connected: boolean;
+  }>;
 };
 
 export type InterviewsResponse = {
@@ -133,4 +193,22 @@ export type ResumeLabResponse = {
     content: string;
   }>;
   progress: number;
+};
+
+export type ChatReplyResponse = {
+  user_message: string;
+  intent: string;
+  retrieved: Array<{
+    id: string;
+    title: string;
+    kind: string;
+    score: number;
+    excerpt: string;
+    tags: string[];
+  }>;
+  draft_reply: string;
+  suggested_action: "send_now" | "review_then_send" | "clarify";
+  confidence: number;
+  provider: string;
+  model: string;
 };
